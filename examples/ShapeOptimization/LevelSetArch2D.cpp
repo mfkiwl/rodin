@@ -37,7 +37,7 @@ int main(int, char**)
     auto& Vh = w.getFiniteElementSpace();
     TrialFunction u(Vh);
     TestFunction  v(Vh);
-    BilinearForm bf(v.getFiniteElementSpace());
+    BilinearForm  bf(u, v);
     bf = Integral(lambda * Div(u), Div(v)).over(Interior)
        + Integral(
            mu * (Jacobian(u) + Jacobian(u).T()), 0.5 * (Jacobian(v) + Jacobian(v).T())).over(Interior);
@@ -122,7 +122,7 @@ int main(int, char**)
     MMG::Advect2D(mmgLs, mmgVel).step(dt);
 
     // Recover the implicit domain
-    auto [mmgImplicit, _] =
+    auto mmgImplicit =
       MMG::ImplicitDomainMesher2D().split(Interior, {Interior, Exterior})
                                    .split(Exterior, {Interior, Exterior})
                                    .setRMC(1e-3)
