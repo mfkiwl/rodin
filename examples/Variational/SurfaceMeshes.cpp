@@ -7,18 +7,19 @@ using namespace Rodin::Variational;
 
 int main(int, char**)
 {
-  const char* meshFile = "../resources/mfem/meshes/surface-meshes-example.mesh";
+  const char* meshFile = "../resources/mfem/surface-meshes-example.mesh";
 
   // Load mesh
-  Mesh Omega = Mesh::load(meshFile);
+  Mesh Omega;
+  Omega.load(meshFile);
 
   // Functions
-  H1 Vh(Omega);
+  FiniteElementSpace<H1> Vh(Omega);
   TrialFunction u(Vh);
   TestFunction  v(Vh);
 
   // Right hand side
-  auto f = ScalarCoefficient(
+  auto f = ScalarFunction(
       [](const double* x, int)
       {
         double l2 = x[0] * x[0] + x[1] * x[1] + x[2] * x[2];

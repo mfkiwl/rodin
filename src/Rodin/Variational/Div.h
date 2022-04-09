@@ -8,10 +8,13 @@
 #include "GridFunction.h"
 #include "TestFunction.h"
 #include "TrialFunction.h"
-#include "ScalarCoefficient.h"
+#include "ScalarFunction.h"
 
 namespace Rodin::Variational
 {
+   /**
+    * @brief Divergence of an H1 ShapeFunction.
+    */
    template <ShapeFunctionSpaceType Space>
    class Div<ShapeFunction<H1, Space>> : public ShapeFunctionBase<Space>
    {
@@ -66,12 +69,12 @@ namespace Rodin::Variational
             return Internal::JacobianShapeR3O(std::move(dshape), sdim, vdim).Trace();
          }
 
-         H1& getFiniteElementSpace() override
+         FiniteElementSpace<H1>& getFiniteElementSpace() override
          {
             return m_u.getFiniteElementSpace();
          }
 
-         const H1& getFiniteElementSpace() const override
+         const FiniteElementSpace<H1>& getFiniteElementSpace() const override
          {
             return m_u.getFiniteElementSpace();
          }

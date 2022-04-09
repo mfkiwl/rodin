@@ -7,30 +7,34 @@
 #ifndef RODIN_VARIATIONAL_FORWARDDECLS_H
 #define RODIN_VARIATIONAL_FORWARDDECLS_H
 
+#include "Rodin/Traits.h"
+#include "Rodin/Parallel/ForwardDecls.h"
+
 namespace Rodin::Variational
 {
    // ---- Problem -----------------------------------------------------------
    class ProblemBase;
 
-   template <class TrialFES, class TestFES>
+   template <class TrialFEC, class TestFEC, class OperatorType, class Trait>
    class Problem;
 
    class ProblemBody;
 
+   // ---- FiniteElementCollection -------------------------------------------
+   class FiniteElementCollectionBase;
+
+   class H1;
+
    // ---- FiniteElementSpace ------------------------------------------------
    class FiniteElementSpaceBase;
 
-   class H1;
+   template <class FEC, class Trait = Traits::Serial>
+   class FiniteElementSpace;
 
    // ---- GridFunction ------------------------------------------------------
    class GridFunctionBase;
 
-   class GridFunctionIndexBase;
-
-   template <class T>
-   class GridFunctionIndex;
-
-   template <class FES>
+   template <class FEC, class Trait = Traits::Serial>
    class GridFunction;
 
    class IncompleteGridFunction;
@@ -48,13 +52,13 @@ namespace Rodin::Variational
    template <ShapeFunctionSpaceType Space>
    class ShapeFunctionBase;
 
-   template <class FES, ShapeFunctionSpaceType Space>
+   template <class FEC, ShapeFunctionSpaceType Space>
    class ShapeFunction;
 
-   template <class FES>
+   template <class FEC, class Trait>
    class TrialFunction;
 
-   template <class FES>
+   template <class FEC, class Trait>
    class TestFunction;
 
    template <class T>
@@ -82,7 +86,7 @@ namespace Rodin::Variational
    // ---- LinearForm --------------------------------------------------------
    class LinearFormBase;
 
-   template <class FES>
+   template <class FEC, class Trait>
    class LinearForm;
 
    class LinearFormIntegratorBase;
@@ -94,7 +98,7 @@ namespace Rodin::Variational
    // ---- BilinearForm ------------------------------------------------------
    class BilinearFormBase;
 
-   template <class TrialFES, class TestFES>
+   template <class TrialFEC, class TestFEC, class Trait>
    class BilinearForm;
 
    class BilinearFormIntegratorBase;
@@ -110,19 +114,19 @@ namespace Rodin::Variational
    class DirichletBC;
 
    // ---- Coefficients ------------------------------------------------------
-   class ScalarCoefficientBase;
+   class ScalarFunctionBase;
 
    template <class T>
-   class ScalarCoefficient;
+   class ScalarFunction;
 
-   class VectorCoefficientBase;
+   class VectorFunctionBase;
 
    template <class ... Values>
-   class VectorCoefficient;
+   class VectorFunction;
 
-   class MatrixCoefficientBase;
+   class MatrixFunctionBase;
 
-   class MatrixCoefficient;
+   class MatrixFunction;
 
    // ---- Expressions -------------------------------------------------------
    template <class T>
@@ -150,6 +154,9 @@ namespace Rodin::Variational
 
    template <class Lhs, class Rhs>
    class Mult;
+
+   template <class Lhs, class Rhs>
+   class Division;
 
    template <class Lhs, class Rhs>
    class Dot;

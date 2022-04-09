@@ -19,19 +19,47 @@ namespace Rodin::Variational
    class LinearFormBase
    {
       public:
-         virtual mfem::LinearForm& getHandle() = 0;
-         virtual const mfem::LinearForm& getHandle() const = 0;
+         void update()
+         {
+            return getHandle().Update();
+         }
+
+         void assemble()
+         {
+            return getHandle().Assemble();
+         }
+
+         /**
+          * @brief Gets the reference to the (local) associated vector
+          * to the LinearForm.
+          */
+         mfem::Vector& getVector()
+         {
+            return static_cast<mfem::Vector&>(getHandle());
+         }
+
+         /**
+          * @brief Gets the reference to the (local) associated vector
+          * to the LinearForm.
+          */
+         const mfem::Vector& getVector() const
+         {
+            return static_cast<const mfem::Vector&>(getHandle());
+         }
 
          virtual LinearFormBase& from(const LinearFormIntegratorBase& lfi) = 0;
+
          virtual LinearFormBase& from(const FormLanguage::LinearFormIntegratorSum& lsum) = 0;
 
          virtual LinearFormBase& add(const LinearFormIntegratorBase& lfi) = 0;
+
          virtual LinearFormBase& add(const FormLanguage::LinearFormIntegratorSum& lsum) = 0;
 
-         virtual void assemble() = 0;
-         virtual void update() = 0;
-
          virtual const ShapeFunctionBase<Test>& getTestFunction() const = 0;
+
+         virtual mfem::LinearForm& getHandle() = 0;
+
+         virtual const mfem::LinearForm& getHandle() const = 0;
    };
 
    /**
@@ -49,8 +77,8 @@ namespace Rodin::Variational
     * A linear form can be specified by from one or more
     * LinearFormIntegratorBase instances.
     */
-   template <class FES>
-   class LinearForm : public LinearFormBase
+   template <class FEC>
+   class LinearForm<FEC, Traits::Serial> : public LinearFormBase
    {
       public:
          using LFIList = std::vector<std::unique_ptr<LinearFormIntegratorBase>>;
@@ -60,7 +88,7 @@ namespace Rodin::Variational
           * space
           * @param[in] fes Reference to the finite element space
           */
-         LinearForm(TestFunction<FES>& v);
+         LinearForm(TestFunction<FEC, Traits::Serial>& v);
 
          LinearForm& operator=(const LinearFormIntegratorBase& lfi);
 
@@ -74,22 +102,20 @@ namespace Rodin::Variational
           *
           * @returns The value which the linear form takes at @f$ u @f$.
           */
-         double operator()(const GridFunction<FES>& u) const;
-
-         void update() override;
-
-         void assemble() override;
-
-         const TestFunction<FES>& getTestFunction() const override
-         {
-            return m_v;
-         }
+         double operator()(const GridFunction<FEC, Traits::Serial>& u) const;
 
          LinearForm& add(const LinearFormIntegratorBase& lfi) override;
+
          LinearForm& add(const FormLanguage::LinearFormIntegratorSum& lsum) override;
 
          LinearForm& from(const LinearFormIntegratorBase& lfi) override;
+
          LinearForm& from(const FormLanguage::LinearFormIntegratorSum& lsum) override;
+
+         const TestFunction<FEC, Traits::Serial>& getTestFunction() const override
+         {
+            return m_v;
+         }
 
          mfem::LinearForm& getHandle() override
          {
@@ -102,7 +128,7 @@ namespace Rodin::Variational
          }
 
       private:
-         TestFunction<FES>& m_v;
+         TestFunction<FEC, Traits::Serial>& m_v;
          std::unique_ptr<mfem::LinearForm> m_lf;
          LFIList m_lfiDomainList;
          LFIList m_lfiBoundaryList;

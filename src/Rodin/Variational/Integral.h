@@ -19,9 +19,9 @@
 #include "GridFunction.h"
 #include "TestFunction.h"
 #include "TrialFunction.h"
-#include "ScalarCoefficient.h"
-#include "VectorCoefficient.h"
-#include "MatrixCoefficient.h"
+#include "ScalarFunction.h"
+#include "VectorFunction.h"
+#include "MatrixFunction.h"
 #include "LinearFormIntegrator.h"
 #include "BilinearFormIntegrator.h"
 
@@ -170,7 +170,7 @@ namespace Rodin::Variational
           *    \int \lambda A(v) \ dx \ .
           * @f]
           */
-         Integral(const ScalarCoefficientBase& lhs, const ShapeFunctionBase<Test>& rhs)
+         Integral(const ScalarFunctionBase& lhs, const ShapeFunctionBase<Test>& rhs)
             : Integral(Dot(lhs, rhs))
          {}
 
@@ -187,7 +187,7 @@ namespace Rodin::Variational
           *    \int \vec{\lambda} \cdot \vec{A}(v) \ dx \ .
           * @f]
           */
-         Integral(const VectorCoefficientBase& lhs, const ShapeFunctionBase<Test>& rhs)
+         Integral(const VectorFunctionBase& lhs, const ShapeFunctionBase<Test>& rhs)
             : Integral(Dot(lhs, rhs))
          {}
 
@@ -262,22 +262,22 @@ namespace Rodin::Variational
    };
    Integral(const ShapeFunctionBase<Test>&)
       -> Integral<ShapeFunctionBase<Test>>;
-   Integral(const ScalarCoefficientBase&, const ShapeFunctionBase<Test>&)
+   Integral(const ScalarFunctionBase&, const ShapeFunctionBase<Test>&)
       -> Integral<ShapeFunctionBase<Test>>;
-   Integral(const VectorCoefficientBase&, const ShapeFunctionBase<Test>&)
+   Integral(const VectorFunctionBase&, const ShapeFunctionBase<Test>&)
       -> Integral<ShapeFunctionBase<Test>>;
 
    /**
     * @brief Integral of a GridFunction
     */
-   template <class FES>
-   class Integral<GridFunction<FES>> : public FormLanguage::Base
+   template <class FEC, class Trait>
+   class Integral<GridFunction<FEC, Trait>> : public FormLanguage::Base
    {
       public:
          /**
           * @brief Constructs the integral object
           */
-         Integral(GridFunction<FES>& u)
+         Integral(GridFunction<FEC, Trait>& u)
             : m_u(u),
               m_v(u.getFiniteElementSpace()),
               m_one(u.getFiniteElementSpace()),
@@ -285,8 +285,8 @@ namespace Rodin::Variational
               m_assembled(false)
          {
             assert(u.getFiniteElementSpace().getVectorDimension() == 1);
-            m_one = ScalarCoefficient(1.0);
-            m_lf.from(Integral<ShapeFunctionBase<Test>>(ScalarCoefficient(u) * m_v));
+            m_one = ScalarFunction(1.0);
+            m_lf.from(Integral<ShapeFunctionBase<Test>>(ScalarFunction(u) * m_v));
          }
 
          Integral(const Integral& other)
@@ -310,14 +310,14 @@ namespace Rodin::Variational
             return new Integral(*this);
          }
       private:
-         GridFunction<FES>&   m_u;
-         TestFunction<FES>    m_v;
-         GridFunction<FES>    m_one;
-         LinearForm<FES>      m_lf;
+         TestFunction<FEC, Trait>    m_v;
+         GridFunction<FEC, Trait>&   m_u;
+         GridFunction<FEC, Trait>    m_one;
+         LinearForm<FEC, Trait>      m_lf;
          bool m_assembled;
    };
-   template <class FES>
-   Integral(GridFunction<FES>&) -> Integral<GridFunction<FES>>;
+   template <class FEC, class Trait>
+   Integral(GridFunction<FEC, Trait>&) -> Integral<GridFunction<FEC, Trait>>;
 
    template <>
    class BoundaryIntegral<ShapeFunctionBase<Test>> : public LinearFormBoundaryIntegrator

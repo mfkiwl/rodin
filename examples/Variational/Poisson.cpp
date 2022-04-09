@@ -1,6 +1,7 @@
-#include "Rodin/Mesh.h"
-#include "Rodin/Solver.h"
-#include "Rodin/Variational.h"
+#include <chrono>
+#include <Rodin/Mesh.h>
+#include <Rodin/Solver.h>
+#include <Rodin/Variational.h>
 
 using namespace Rodin;
 using namespace Rodin::Variational;
@@ -13,16 +14,17 @@ int main(int, char**)
   int Gamma = 1;
 
   // Load mesh
-  Mesh Omega = Mesh::load(meshFile);
+  Mesh Omega;
+  Omega.load(meshFile);
 
   // Functions
-  H1 Vh(Omega);
+  FiniteElementSpace<H1> Vh(Omega);
   TrialFunction u(Vh);
   TestFunction  v(Vh);
 
   // Define problem
-  auto f = ScalarCoefficient(1.0);
-  auto g = ScalarCoefficient(0.0);
+  auto f = ScalarFunction(1.0);
+  auto g = ScalarFunction(0.0);
 
   Problem poisson(u, v);
   poisson = Integral(Grad(u), Grad(v))

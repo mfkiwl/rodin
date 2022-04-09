@@ -25,8 +25,8 @@ int main(int, char**)
   int Gamma0 = 1, GammaD = 2, GammaN = 3, Gamma = 4;
 
   // Lamé coefficients
-  auto mu     = ScalarCoefficient(0.3846),
-       lambda = ScalarCoefficient(0.5769);
+  auto mu     = ScalarFunction(0.3846),
+       lambda = ScalarFunction(0.5769);
 
   // Compliance
   auto compliance = [&](GridFunction<H1>& w)
@@ -42,7 +42,9 @@ int main(int, char**)
   };
 
   // Load mesh
-  Mesh Omega = Mesh::load(meshFile);
+  Mesh Omega;
+  Omega.load(meshFile);
+
   Omega.save("Omega0.mesh");
   std::cout << "Saved initial mesh to Omega0.mesh" << std::endl;
 
@@ -53,8 +55,8 @@ int main(int, char**)
   size_t maxIt = 150;
   double eps = 1e-6;
   double hmax = 0.05;
-  auto ell = ScalarCoefficient(1);
-  auto alpha = ScalarCoefficient(4 * hmax * hmax);
+  auto ell = ScalarFunction(1);
+  auto alpha = ScalarFunction(4 * hmax * hmax);
 
   std::vector<double> obj;
 
@@ -63,16 +65,16 @@ int main(int, char**)
   {
     // Vector field finite element space over the whole domain
     int d = 2;
-    H1 Vh(Omega, d);
+    FiniteElementSpace<H1> Vh(Omega, d);
 
     // Trim the exterior part of the mesh to solve the elasticity system
     SubMesh trimmed = Omega.trim(Exterior, Gamma);
 
     // Build a finite element space over the trimmed mesh
-    H1 VhInt(trimmed, d);
+    FiniteElementSpace<H1> VhInt(trimmed, d);
 
     // Elasticity equation
-    auto f = VectorCoefficient{0, -1};
+    auto f = VectorFunction{0, -1};
     TrialFunction uInt(VhInt);
     TestFunction  vInt(VhInt);
     Problem elasticity(uInt, vInt);
@@ -80,7 +82,7 @@ int main(int, char**)
                + Integral(
                    mu * (Jacobian(uInt) + Jacobian(uInt).T()), 0.5 * (Jacobian(vInt) + Jacobian(vInt).T()))
                - BoundaryIntegral(f, vInt).over(GammaN)
-               + DirichletBC(uInt, VectorCoefficient{0, 0}).on(GammaD);
+               + DirichletBC(uInt, VectorFunction{0, 0}).on(GammaD);
     solver.solve(elasticity);
 
     // Transfer solution back to original domain
@@ -97,8 +99,8 @@ int main(int, char**)
     Problem hilbert(g, v);
     hilbert = Integral(alpha * Jacobian(g), Jacobian(v))
             + Integral(g, v)
-            + BoundaryIntegral(Dot(Ae, e) - ell, Dot(v, n)).over(Gamma)
-            + DirichletBC(g, VectorCoefficient{0, 0}).on(GammaN);
+            - BoundaryIntegral(Dot(Ae, e) - ell, Dot(v, n)).over(Gamma)
+            + DirichletBC(g, VectorFunction{0, 0}).on(GammaN);
     solver.solve(hilbert);
 
     // Update objective
@@ -128,7 +130,7 @@ int main(int, char**)
                                    .discretize(mmgLs);
 
     // Convert back to Rodin data type
-    Omega = Cast(mmgImplicit).to<Rodin::Mesh>();
+    Omega = Cast(mmgImplicit).to<Rodin::Mesh<>>();
 
     // Save mesh
     Omega.save("Omega.mesh");
