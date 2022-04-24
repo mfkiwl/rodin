@@ -44,11 +44,6 @@ namespace Rodin::Variational
          enum Basis
          {
             /**
-             * @brief Gauss Legendre basis (endpoints are not included).
-             */
-            GaussLegendre        = mfem::BasisType::GaussLegendre,
-
-            /**
              * @brief Gauss Lobatto basis (endpoints are included).
              */
             GaussLobato          = mfem::BasisType::GaussLobatto,
@@ -57,17 +52,6 @@ namespace Rodin::Variational
              * @brief Bernstein polynomial basis.
              */
             Bernstein            = mfem::BasisType::Positive,
-
-            /**
-             * @brief Open uniform basis.
-             *
-             * The nodes @f$ x_i @f$ are defined by:
-             * @f[
-             *    x_i := \dfrac{i + 1}{n + 1}
-             * @f]
-             * for @f$ i = 0, \ldots, n - 1 @f$.
-             */
-            OpenUniform          = mfem::BasisType::OpenUniform,
 
             /**
              * @brief Closed uniform basis.
@@ -81,33 +65,10 @@ namespace Rodin::Variational
             ClosedUniform        = mfem::BasisType::ClosedUniform,
 
             /**
-             * @brief Open-half uniform basis.
-             *
-             * The nodes @f$ x_i @f$ are defined by:
-             * @f[
-             *    x_i := \dfrac{i + \frac{1}{2}}{n}
-             * @f]
-             * for @f$ i = 0, \ldots, n - 1 @f$.
-             */
-            OpenHalfUniform      = mfem::BasisType::OpenHalfUniform,
-
-            /**
              * @brief Serendipity basis (squares / cubes).
              * @todo Find out exactly which basis this is.
              */
             Serendipity          = mfem::BasisType::Serendipity,
-
-            /**
-             * @brief Closed Gauss legendre basis.
-             * @todo Find out exactly which basis this is.
-             */
-            ClosedGaussLegendre  = mfem::BasisType::ClosedGL,
-
-            /**
-             * @brief Integrated GLL indicator functions.
-             * @todo Find out exactly which basis this is.
-             */
-            IntegratedGLL        = mfem::BasisType::IntegratedGLL
          };
 
          static constexpr Basis DefaultBasis = Basis::GaussLobato;
